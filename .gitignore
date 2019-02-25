@@ -1,0 +1,7 @@
+cocoapi/
+kinoEnv/
+models/
+ssd_mobilenet_v1_coco_2017_11_17/
+test_images/
+
+ssd_mobilenet_v1_coco_2017_11_17.tar.gz
