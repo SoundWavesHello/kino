@@ -1,24 +1,30 @@
 import numpy as np
 import cv2
+from application import get_results
 
-# so I need a feasible video clip to test on
-cap = cv2.VideoCapture('vtest.avi')
-count = 0
-results = {}
-while(cap.isOpened()):
-	ret, frame = cap.read()
+print("IN CV_TEST")
 
-	# gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	# cv2.imshow('frame',gray)
+vidcap = cv2.VideoCapture('test_videos/video2.mp4')
 
-	# probably edit sample rate
-	results[count] = application.get_results(frame)
+print("CAP OPEN")
 
-	count += 1
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
+sec = 0
+frameRate = 1 #it will capture image in each 1 second
+results = []
 
-cap.release()
-cv2.destroyAllWindows()
+def getFrame(sec):
+	print("AT FRAME " + str(sec))	
+	vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
+	hasFrames,image = vidcap.read()
+	if hasFrames:
+		width, height = image.shape[:2]
+		info = get_results(image, width, height)
+		print(info)
+		results.append(info)
+	return hasFrames
 
-print(results)
+
+success = getFrame(sec)
+while success:
+	sec = sec + frameRate
+	success = getFrame(sec)

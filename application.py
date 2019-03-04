@@ -28,7 +28,7 @@ MODEL_FILE = MODEL_NAME + '.tar.gz'
 DOWNLOAD_BASE = 'http://download.tensorflow.org/models/object_detection/'
 
 # What our accuracy cutoff is
-THRESH = 0.8
+THRESH = 0.5
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_FROZEN_GRAPH = MODEL_NAME + '/frozen_inference_graph.pb'
@@ -59,10 +59,13 @@ with detection_graph.as_default():
 
 category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
-def load_image_into_numpy_array(image):
-  (im_width, im_height) = image.size
-  return np.array(image.getdata()).reshape(
-      (im_height, im_width, 3)).astype(np.uint8)
+def load_image_into_numpy_array(image, im_width, im_height):
+  # FOR FEEDING IMAGES
+  # (im_width, im_height) = image.size
+  # return np.array(image.getdata()).reshape(
+  #     (im_height, im_width, 3)).astype(np.uint8)
+
+  return image.reshape((im_height, im_width, 3)).astype(np.uint8)
 
 # For the sake of simplicity we will use only 2 images:
 # image1.jpg
@@ -121,8 +124,8 @@ def run_inference_for_single_image(image, graph):
     return output_dict
 
 
-def get_results(image):
-  image_np = load_image_into_numpy_array(image)
+def get_results(image_np, width, height):
+  # image_np = load_image_into_numpy_array(image, width, height)
   # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
   image_np_expanded = np.expand_dims(image_np, axis=0)
   # Actual detection.
@@ -131,9 +134,10 @@ def get_results(image):
   results = []
   for i in range(len(output_dict['detection_scores'])):
     score = output_dict['detection_scores'][i]
+    location = output_dict['detection_boxes'][i]
     item = category_index[output_dict['detection_classes'][i]]['name']
     if (score > THRESH):
-      results.append((score, item))
+      results.append((score, item, location))
     else:
       break
 
